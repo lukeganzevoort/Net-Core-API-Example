@@ -1,5 +1,7 @@
-using CarApi.Data;
 using Microsoft.EntityFrameworkCore;
+using CarApi.Data;
+using CarApi.Models;
+using CarApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CarContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CarDatabase")));
+
+builder.Services.AddScoped<ICarService, CarService>();
+
+builder.Services.AddHttpClient();
+
+// Add support for controllers (This is the missing part)
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -22,9 +31,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Define your API endpoints
-app.MapGet("/cars", () => "Retrieve all cars");
-app.MapPost("/cars", () => "Create a new car");
-app.MapPut("/cars/{id}", () => "Update a car");
+// Use routing and endpoints (This enables MVC controllers)
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();  // This line maps controller routes
+});
 
 app.Run();
